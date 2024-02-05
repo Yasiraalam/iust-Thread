@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.yasir.iustthread" />
+                  <option name="mobileSdkAppId" value="1:439836778983:android:d0627eb5a30d1905c61d42" />
+                  <option name="projectId" value="iust-threads" />
+                  <option name="projectNumber" value="439836778983" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
