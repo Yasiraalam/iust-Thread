@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "439836778983",
+    "project_id": "iust-threads",
+    "storage_bucket": "iust-threads.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439836778983:android:d0627eb5a30d1905c61d42",
+        "android_client_info": {
+          "package_name": "com.yasir.iustthread"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6n3lktkXcrvTLYJaRV2JV6GMPwwD4-_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
