@@ -27,6 +27,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -73,9 +74,8 @@ fun Register(navHostController: NavHostController) {
 
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
-
     }
-    val authViewModel:AuthViewModel= AuthViewModel()
+    val authViewModel: AuthViewModel = AuthViewModel()
     val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
 
     val context = LocalContext.current
@@ -88,14 +88,28 @@ fun Register(navHostController: NavHostController) {
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri = uri
-
     }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             if (isGranted) {
 
             }
         }
+
+    LaunchedEffect(firebaseUser) {
+        if (firebaseUser != null) {
+            navHostController.navigate(Routes.BottomNav.routes) {
+                popUpTo(navHostController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        } else {
+            navHostController.navigate(Routes.Login.routes) {
+                popUpTo(navHostController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -128,11 +142,10 @@ fun Register(navHostController: NavHostController) {
                     ) == PackageManager.PERMISSION_GRANTED
 
                     if (isGranted) {
-                        launcher.launch("ima ges/*")
+                        launcher.launch("image/*")
                     } else {
                         permissionLauncher.launch(permissionToRequest)
                     }
-
                 },
             contentScale = ContentScale.Crop
         )
@@ -194,10 +207,18 @@ fun Register(navHostController: NavHostController) {
         )
         ElevatedButton(
             onClick = {
-                if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
+                if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
                     Toast.makeText(context, "Please fill all details!", Toast.LENGTH_SHORT).show()
-                }else{
-                    authViewModel.register(email,password,name,bio,username,)
+                } else {
+                    authViewModel.register(
+                        email,
+                        password,
+                        name,
+                        bio,
+                        username,
+                        imageUri!!,
+                        context
+                    )
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -233,8 +254,4 @@ fun Register(navHostController: NavHostController) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun RegisterView() {
-//    Register()
-}
+
