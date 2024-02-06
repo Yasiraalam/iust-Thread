@@ -42,7 +42,7 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(Routes.Profile.routes){
-            Profile()
+            Profile(navController)
         }
         composable(Routes.BottomNav.routes){
             BottomNav(navController)

@@ -15,7 +15,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,15 +33,32 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.yasir.iustthread.navigation.Routes
+import com.yasir.iustthread.viewmodel.AuthViewModel
 
 @Composable
-fun Login(navHostController: NavHostController) {
+fun Login(navController: NavHostController) {
     var email by remember {
         mutableStateOf("")
     }
     var password by remember {
         mutableStateOf("")
     }
+    val context = LocalContext.current
+    val authViewModel: AuthViewModel = AuthViewModel()
+    val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
+    val error by authViewModel.error.observeAsState(null)
+
+    LaunchedEffect(firebaseUser) {
+        if (firebaseUser != null) {
+            navController.navigate(Routes.BottomNav.routes) {
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        }
+    }
+   error?.let {
+       Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+   }
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,7 +97,13 @@ fun Login(navHostController: NavHostController) {
                 .padding(16.dp)
         )
         ElevatedButton(
-            onClick = { /*TODO*/ },
+            onClick = {
+                if (email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(context, "Please fill details!", Toast.LENGTH_SHORT).show()
+                } else {
+                    authViewModel.login(email, password, context)
+                }
+            },
             modifier = Modifier.fillMaxWidth()
 
         ) {
@@ -94,8 +119,8 @@ fun Login(navHostController: NavHostController) {
         val context = LocalContext.current
         TextButton(
             onClick = {
-                navHostController.navigate(Routes.Register.routes){
-                    popUpTo(navHostController.graph.startDestinationId)
+                navController.navigate(Routes.Register.routes) {
+                    popUpTo(navController.graph.startDestinationId)
                     launchSingleTop = true
                 }
             },

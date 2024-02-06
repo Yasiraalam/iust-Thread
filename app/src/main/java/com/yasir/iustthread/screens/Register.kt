@@ -96,15 +96,9 @@ fun Register(navHostController: NavHostController) {
 
             }
         }
-
-    LaunchedEffect(firebaseUser) {
-        if (firebaseUser != null) {
+    LaunchedEffect(firebaseUser){
+        if(firebaseUser != null){
             navHostController.navigate(Routes.BottomNav.routes) {
-                popUpTo(navHostController.graph.startDestinationId)
-                launchSingleTop = true
-            }
-        } else {
-            navHostController.navigate(Routes.Login.routes) {
                 popUpTo(navHostController.graph.startDestinationId)
                 launchSingleTop = true
             }
@@ -142,10 +136,11 @@ fun Register(navHostController: NavHostController) {
                     ) == PackageManager.PERMISSION_GRANTED
 
                     if (isGranted) {
-                        launcher.launch("image/*")
+                        launcher.launch("ima ges/*")
                     } else {
                         permissionLauncher.launch(permissionToRequest)
                     }
+
                 },
             contentScale = ContentScale.Crop
         )
@@ -207,18 +202,10 @@ fun Register(navHostController: NavHostController) {
         )
         ElevatedButton(
             onClick = {
-                if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
+                if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
                     Toast.makeText(context, "Please fill all details!", Toast.LENGTH_SHORT).show()
-                } else {
-                    authViewModel.register(
-                        email,
-                        password,
-                        name,
-                        bio,
-                        username,
-                        imageUri!!,
-                        context
-                    )
+                }else{
+                    authViewModel.register(email,password,name,bio,username,imageUri!!,context)
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -253,5 +240,4 @@ fun Register(navHostController: NavHostController) {
         }
     }
 }
-
 
