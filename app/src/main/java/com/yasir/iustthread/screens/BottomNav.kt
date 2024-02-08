@@ -48,7 +48,7 @@ fun BottomNav(navController: NavHostController) {
             }
 
             composable(Routes.AddThread.routes) {
-                AddThreads()
+                AddThreads(navController)
             }
 
             composable(Routes.Profile.routes) {
@@ -105,7 +105,6 @@ fun MyBottomBar(navController1: NavHostController) {
             },
                 icon = {
                     Icon(imageVector = it.icon, contentDescription = it.title)
-
                 })
 
         }
