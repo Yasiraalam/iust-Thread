@@ -39,7 +39,6 @@ class AuthViewModel : ViewModel() {
             if (it.isSuccessful) {
                 _firebaseUser.postValue(auth.currentUser)
                 getData(auth.currentUser!!.uid,context)
-
             } else {
                 _error.postValue(it.exception?.message)
             }

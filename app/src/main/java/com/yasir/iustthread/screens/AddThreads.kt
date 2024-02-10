@@ -82,7 +82,7 @@ fun AddThreads(navHostController: NavHostController) {
         }
 
     LaunchedEffect(isPosted) {
-        if (isPosted!!) {
+        if (isPosted) {
             thread = ""
             imageUri = null
             Toast.makeText(context, "thread Posted!", Toast.LENGTH_SHORT).show()
@@ -123,7 +123,8 @@ fun AddThreads(navHostController: NavHostController) {
                         }
                         launchSingleTop=true
                     }
-                })
+                }
+        )
         Text(
             text = "Add Thread",
             style = TextStyle(
