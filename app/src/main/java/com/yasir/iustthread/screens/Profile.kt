@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -24,6 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,7 +95,7 @@ fun Profile(navHostController: NavHostController) {
 
     }
 
-    LazyColumn() {
+    LazyColumn {
         item {
             ConstraintLayout(
                 modifier = Modifier
@@ -126,7 +132,7 @@ fun Profile(navHostController: NavHostController) {
                             end.linkTo(parent.end)
 
                         }
-                        .size(120.dp)
+                        .size(110.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
 
@@ -171,10 +177,10 @@ fun Profile(navHostController: NavHostController) {
                         start.linkTo(parent.start)
                     }
                 )
+                var showDialog by remember { mutableStateOf(false) }
                 ElevatedButton(
                     onClick = {
-                        SharedPref.clearData(context)
-                        authViewModel.logout()
+                        showDialog = true
                     },
                     modifier = Modifier.constrainAs(button) {
                         top.linkTo(following.bottom)
@@ -183,9 +189,40 @@ fun Profile(navHostController: NavHostController) {
                 ) {
                     Text(text = "Logout")
                 }
+
+                if (showDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { Text("Logout") },
+                        text = { Text("Are you sure you want to Logout?") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    SharedPref.clearData(context)
+                                    showDialog = false
+                                    authViewModel.logout()
+                                }
+                            ) {
+                                Text("YES")
+                            }
+                        },
+                        dismissButton = {
+                            Button(
+                                onClick = {
+                                    showDialog = false
+                                }
+                            ) {
+                                Text("CANCEL")
+                            }
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
+
         items(threads ?: emptyList()) { pair ->
+            Divider(color = Color.Black, thickness = 1.dp)
             ThreadItem(
                 thread = pair,
                 users = user,

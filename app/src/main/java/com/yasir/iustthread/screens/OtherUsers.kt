@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,9 +24,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -110,7 +113,7 @@ fun OtherUsers(
                             end.linkTo(parent.end)
 
                         }
-                        .size(120.dp)
+                        .size(110.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
 
@@ -128,11 +131,16 @@ fun OtherUsers(
                 Text(
                     text = users!!.bio,
                     style = TextStyle(
-                        fontSize = 20.sp
+                        fontSize = 13.sp
                     ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4,
                     modifier = Modifier.constrainAs(bio) {
                         top.linkTo(username.bottom)
-                        start.linkTo(parent.start)
+                        start.linkTo(username.start)
+                        end.linkTo(logo.start)
+                        bottom.linkTo(followers.top)
+                        width = Dimension.fillToConstraints
                     }
                 )
                 Text(
@@ -174,6 +182,7 @@ fun OtherUsers(
         }
         if (threads != null && users != null) {
             items(threads ?: emptyList()) { pair ->
+                Divider(color = Color.Black, thickness = 1.dp)
                 ThreadItem(
                     thread = pair,
                     users = users!!,
