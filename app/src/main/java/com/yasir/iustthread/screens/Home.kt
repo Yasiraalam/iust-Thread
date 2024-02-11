@@ -30,7 +30,6 @@ fun Home(navHostController:NavHostController) {
                 FirebaseAuth.getInstance().currentUser!!.uid
             )
         }
-
     }
 }
 

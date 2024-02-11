@@ -1,13 +1,11 @@
 package com.yasir.iustthread.screens
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +20,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,11 +47,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.yasir.iustthread.R
@@ -75,6 +77,8 @@ fun Register(navHostController: NavHostController) {
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+    var showDialog by remember { mutableStateOf(false) }
+
     val authViewModel: AuthViewModel = AuthViewModel()
     val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
 
@@ -136,7 +140,7 @@ fun Register(navHostController: NavHostController) {
                     ) == PackageManager.PERMISSION_GRANTED
 
                     if (isGranted) {
-                        launcher.launch("ima ges/*")
+                        launcher.launch("image/*")
                     } else {
                         permissionLauncher.launch(permissionToRequest)
                     }
@@ -144,7 +148,13 @@ fun Register(navHostController: NavHostController) {
                 },
             contentScale = ContentScale.Crop
         )
-        Box(modifier = Modifier.height(50.dp))
+        Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "",
+                tint = Color.Black,
+                modifier = Modifier.size(20.dp)
+        )
+        Box(modifier = Modifier.height(40.dp))
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -200,15 +210,21 @@ fun Register(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
         )
+        val backgroundColor = if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
+            Color.LightGray
+        } else {
+            Color.Black
+        }
         ElevatedButton(
             onClick = {
                 if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
-                    Toast.makeText(context, "Please fill all details!", Toast.LENGTH_SHORT).show()
+                    showDialog = true
                 }else{
                     authViewModel.register(email,password,name,bio,username,imageUri!!,context)
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            colors = ButtonDefaults.buttonColors(backgroundColor),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
 
         ) {
             Text(
@@ -218,6 +234,21 @@ fun Register(navHostController: NavHostController) {
                     fontSize = 20.sp
                 ),
                 modifier = Modifier.padding(vertical = 6.dp)
+            )
+        }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Register") },
+                text = { Text("Please fill all details first.") },
+                confirmButton = {
+                    Button(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
             )
         }
         TextButton(

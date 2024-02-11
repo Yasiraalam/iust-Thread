@@ -1,6 +1,7 @@
 package com.yasir.iustthread.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,14 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.yasir.iustthread.navigation.Routes
 import com.yasir.iustthread.viewmodel.AuthViewModel
@@ -43,6 +45,7 @@ fun Login(navController: NavHostController) {
     var password by remember {
         mutableStateOf("")
     }
+    var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val authViewModel: AuthViewModel = AuthViewModel()
     val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
@@ -96,14 +99,20 @@ fun Login(navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(16.dp)
         )
+        val backgroundColor = if (email.isEmpty() || password.isEmpty()) {
+            Color.LightGray
+        } else {
+            Color.Black
+        }
         ElevatedButton(
             onClick = {
                 if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(context, "Please fill details!", Toast.LENGTH_SHORT).show()
+                    showDialog = true
                 } else {
                     authViewModel.login(email, password, context)
                 }
             },
+            colors = ButtonDefaults.buttonColors(backgroundColor),
             modifier = Modifier.fillMaxWidth()
 
         ) {
@@ -116,7 +125,21 @@ fun Login(navController: NavHostController) {
                 modifier = Modifier.padding(vertical = 6.dp)
             )
         }
-        val context = LocalContext.current
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Login") },
+                text = { Text("Please fill all details first.") },
+                confirmButton = {
+                    Button(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
+            )
+        }
         TextButton(
             onClick = {
                 navController.navigate(Routes.Register.routes) {
@@ -125,7 +148,6 @@ fun Login(navController: NavHostController) {
                 }
             },
             modifier = Modifier.fillMaxWidth()
-
         ) {
             Text(
                 text = "New User? Create account",
@@ -136,10 +158,4 @@ fun Login(navController: NavHostController) {
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginView() {
-//    Login()
 }

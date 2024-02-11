@@ -9,6 +9,7 @@ import com.yasir.iustthread.screens.BottomNav
 import com.yasir.iustthread.screens.Home
 import com.yasir.iustthread.screens.Login
 import com.yasir.iustthread.screens.Notification
+import com.yasir.iustthread.screens.OtherUsers
 import com.yasir.iustthread.screens.Profile
 import com.yasir.iustthread.screens.Register
 import com.yasir.iustthread.screens.Search
@@ -34,7 +35,7 @@ fun NavGraph(navController: NavHostController) {
         }
 
         composable(Routes.Search.routes){
-            Search()
+            Search(navController)
         }
 
         composable(Routes.AddThread.routes){
@@ -52,6 +53,10 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Routes.Register.routes){
             Register(navController)
+        }
+        composable(Routes.OtherUsers.routes){
+            val data = it.arguments!!.getString("data")
+            OtherUsers(navController,data!!)
         }
     }
 }
