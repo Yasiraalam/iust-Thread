@@ -129,7 +129,7 @@ fun OtherUsers(
                     }
                 )
                 Text(
-                    text = users!!.bio,
+                    text = (users!!.bio),
                     style = TextStyle(
                         fontSize = 13.sp
                     ),

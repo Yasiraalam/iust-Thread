@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,8 +24,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,6 +49,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -59,13 +64,13 @@ import com.yasir.iustthread.viewmodel.AuthViewModel
 @Composable
 fun Register(navHostController: NavHostController) {
     var email by remember {
-        mutableStateOf("")
+        mutableStateOf(TextFieldValue())
     }
     var name by remember {
         mutableStateOf("")
     }
     var username by remember {
-        mutableStateOf("")
+        mutableStateOf(TextFieldValue())
     }
     var bio by remember {
         mutableStateOf("")
@@ -78,10 +83,15 @@ fun Register(navHostController: NavHostController) {
         mutableStateOf<Uri?>(null)
     }
     var showDialog by remember { mutableStateOf(false) }
-
+    // Regex pattern for email validation
+    val emailRegex = Regex("^([a-zA-Z0-9._%+-]+)?@+(?:gmail|hotmail|outlook)\\.com\$")
     val authViewModel: AuthViewModel = AuthViewModel()
     val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
 
+    val loading = remember { mutableStateOf(false) }
+    var passwordVisibility by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf(false) }
+    var userNameError by remember { mutableStateOf("") }
     val context = LocalContext.current
     val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_IMAGES
@@ -100,8 +110,9 @@ fun Register(navHostController: NavHostController) {
 
             }
         }
-    LaunchedEffect(firebaseUser){
-        if(firebaseUser != null){
+    LaunchedEffect(firebaseUser) {
+        if (firebaseUser != null || loading.value) {
+            loading.value = false
             navHostController.navigate(Routes.BottomNav.routes) {
                 popUpTo(navHostController.graph.startDestinationId)
                 launchSingleTop = true
@@ -149,26 +160,37 @@ fun Register(navHostController: NavHostController) {
             contentScale = ContentScale.Crop
         )
         Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "",
-                tint = Color.Black,
-                modifier = Modifier.size(20.dp)
+            imageVector = Icons.Default.Edit,
+            contentDescription = "",
+            tint = Color.Black,
+            modifier = Modifier.size(20.dp)
         )
         Box(modifier = Modifier.height(40.dp))
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = {
+                name = it
+            },
             label = { Text("Name") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             ),
             singleLine = true,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
         )
+
         OutlinedTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                userNameError = if (it.text.isNotEmpty()) {
+                    ""
+                } else {
+                    "Username cannot be empty"
+                }
+            },
+            isError = userNameError.isNotEmpty(),
             label = { Text("Username") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
@@ -177,6 +199,14 @@ fun Register(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
         )
+        if (userNameError.isNotEmpty()) {
+            Text(
+                text = userNameError,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
         OutlinedTextField(
             value = bio,
             onValueChange = { bio = it },
@@ -190,7 +220,10 @@ fun Register(navHostController: NavHostController) {
         )
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = !it.text.matches(emailRegex)
+            },
             label = { Text("Email") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
@@ -199,6 +232,21 @@ fun Register(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
         )
+        if (emailError) {
+            Text(
+                text = "Invalid email format",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 5.dp)
+            )
+        }
+        val icon = if (passwordVisibility) {
+            painterResource(id = R.drawable.visible_icon)
+        } else {
+            painterResource(id = R.drawable.visibility_off_icon)
+        }
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -207,34 +255,61 @@ fun Register(navHostController: NavHostController) {
                 keyboardType = KeyboardType.Password
             ),
             singleLine = true,
+            trailingIcon = {
+                IconButton(
+                    onClick = { passwordVisibility = !passwordVisibility }
+                ) {
+                    Icon(painter = icon, contentDescription = "Toggle visibility")
+                }
+            },
+            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier
                 .fillMaxWidth()
         )
-        val backgroundColor = if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
-            Color.LightGray
-        } else {
-            Color.Black
-        }
-        ElevatedButton(
-            onClick = {
-                if (name.isEmpty() || email.isEmpty() || bio.isEmpty() || password.isEmpty()|| imageUri==null) {
-                    showDialog = true
-                }else{
-                    authViewModel.register(email,password,name,bio,username,imageUri!!,context)
-                }
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
-
-        ) {
-            Text(
-                text = "Register",
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                ),
-                modifier = Modifier.padding(vertical = 6.dp)
+        val backgroundColor =
+            if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
+                Color.LightGray
+            } else {
+                Color.Black
+            }
+        if (loading.value) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(50.dp),
+                color = MaterialTheme.colorScheme.primary
             )
+        } else {
+            ElevatedButton(
+                onClick = {
+                    if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
+                        showDialog = true
+                    } else {
+                        loading.value = true
+                        authViewModel.register(
+                            email.text,
+                            password,
+                            name,
+                            bio,
+                            username.text,
+                            imageUri!!,
+                            context,
+                            loading
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text(
+                    text = "Register",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    ),
+                    modifier = Modifier.padding(vertical = 6.dp)
+                )
+            }
         }
         if (showDialog) {
             AlertDialog(

@@ -3,6 +3,7 @@ package com.yasir.iustthread.viewmodel
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -36,21 +37,20 @@ class AuthViewModel : ViewModel() {
 
     }
 
-    fun login(email: String, password: String,context: Context) {
+    fun login(email: String, password: String,loading: MutableState<Boolean>, context: Context) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
                 _firebaseUser.postValue(auth.currentUser)
+                loading.value = false
                 getData(auth.currentUser!!.uid,context)
             } else {
+                loading.value = false
                 _error.postValue(it.exception?.message)
             }
         }
     }
 
     private fun getData(uid: String,context: Context) {
-
-
-
             userRef.child(uid).addListenerForSingleValueEvent(object :ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val userData = snapshot.getValue(UserModel::class.java)
@@ -63,7 +63,6 @@ class AuthViewModel : ViewModel() {
                         context
                     )
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(context, "Something went wrong! login again or check", Toast.LENGTH_SHORT).show()
                 }
@@ -78,13 +77,16 @@ class AuthViewModel : ViewModel() {
         bio: String,
         username: String,
         imageUri: Uri,
-        context: Context
+        context: Context,
+        loading: MutableState<Boolean>
     ) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
+                loading.value = false
                 _firebaseUser.postValue(auth.currentUser)
                 saveImage(email, password, name, bio, username, imageUri, auth.currentUser?.uid, context)
             } else {
+                loading.value = false
                 _error.postValue("Something went Wrong.")
             }
         }

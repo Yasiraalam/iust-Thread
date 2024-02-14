@@ -41,7 +41,7 @@ object SharedPref {
 
     fun getBio(context:Context):String{
         val sharedPreferences = context.getSharedPreferences("Users",MODE_PRIVATE)
-        return sharedPreferences.getString("Bio","")!!
+        return sharedPreferences.getString("bio","Bio not available")!!
     }
 
     fun getImageUrl(context:Context):String{
@@ -49,7 +49,7 @@ object SharedPref {
         return sharedPreferences.getString("imageUrl","")!!
     }
     fun clearData(context: Context) {
-        val sharedPreferences = context.getSharedPreferences("Users", Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences("Users", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.clear()
         editor.apply()

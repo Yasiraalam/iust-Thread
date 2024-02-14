@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -117,11 +119,11 @@ fun AddThreads(navHostController: NavHostController) {
                     start.linkTo(parent.start)
                 }
                 .clickable {
-                    navHostController.navigate(Routes.Home.routes){
-                        popUpTo(Routes.AddThread.routes){
-                            inclusive =true
+                    navHostController.navigate(Routes.Home.routes) {
+                        popUpTo(Routes.AddThread.routes) {
+                            inclusive = true
                         }
-                        launchSingleTop=true
+                        launchSingleTop = true
                     }
                 }
         )
@@ -169,11 +171,10 @@ fun AddThreads(navHostController: NavHostController) {
             onValueChange = { thread = it },
             modifier = Modifier
                 .constrainAs(editText) {
-                    top.linkTo(username.bottom)
-                    start.linkTo(username.start)
+                    top.linkTo(username.bottom, margin = 16.dp)
+                    start.linkTo(username.start, margin = 10.dp)
                     end.linkTo(parent.end)
                 }
-                .padding(horizontal = 8.dp, vertical = 8.dp)
                 .fillMaxWidth()
         )
         if (imageUri == null) {
@@ -231,7 +232,7 @@ fun AddThreads(navHostController: NavHostController) {
         Text(
             text = "Anyone Can reply",
             style = TextStyle(
-                fontSize = 20.sp
+                fontSize = 17.sp
             ),
             modifier = Modifier
                 .constrainAs(replyText) {
@@ -239,21 +240,41 @@ fun AddThreads(navHostController: NavHostController) {
                     bottom.linkTo(parent.bottom, margin = 12.dp)
                 }
         )
+        var showDialog by remember { mutableStateOf(false) }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Thread") },
+                text = { Text("Write Something in Thread or Upload picture") },
+                confirmButton = {
+                    Button(
+                        onClick = { showDialog = false }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
+            )
+        }
         TextButton(
             onClick = {
-                if (imageUri == null) {
-                    threadViewModel.saveData(
-                        thread,
-                        FirebaseAuth.getInstance().currentUser!!.uid,
-                        ""
-                    )
-                } else {
-                    threadViewModel.saveImage(
-                        thread,
-                        FirebaseAuth.getInstance().currentUser!!.uid,
-                        imageUri!!
-                    )
-                }
+                    if (imageUri == null && thread.isNotEmpty()) {
+                        threadViewModel.saveData(
+                            thread,
+                            FirebaseAuth.getInstance().currentUser!!.uid,
+                            ""
+                        )
+                    }
+                    else if(imageUri!=null) {
+                        threadViewModel.saveImage(
+                            thread,
+                            FirebaseAuth.getInstance().currentUser!!.uid,
+                            imageUri!!
+                        )
+                    }else{
+                        showDialog = true
+                    }
+
             },
             modifier = Modifier.constrainAs(button) {
                 end.linkTo(parent.end)

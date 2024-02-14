@@ -39,9 +39,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -150,11 +152,16 @@ fun Profile(navHostController: NavHostController) {
                 Text(
                     text = SharedPref.getBio(context),
                     style = TextStyle(
-                        fontSize = 20.sp
+                        fontSize = 13.sp
                     ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 4,
                     modifier = Modifier.constrainAs(bio) {
                         top.linkTo(username.bottom)
                         start.linkTo(parent.start)
+                        end.linkTo(logo.start)
+                        bottom.linkTo(followers.top)
+                        width = Dimension.fillToConstraints
                     }
                 )
                 Text(
