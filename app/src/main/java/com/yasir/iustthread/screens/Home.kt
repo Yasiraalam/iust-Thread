@@ -32,9 +32,3 @@ fun Home(navHostController:NavHostController) {
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ShowHome() {
-//    Home()
-//}
