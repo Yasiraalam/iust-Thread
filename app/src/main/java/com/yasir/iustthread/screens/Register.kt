@@ -76,7 +76,7 @@ fun Register(navHostController: NavHostController) {
         mutableStateOf("")
     }
     var password by remember {
-        mutableStateOf("")
+        mutableStateOf(TextFieldValue())
     }
 
     var imageUri by remember {
@@ -85,12 +85,15 @@ fun Register(navHostController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
     // Regex pattern for email validation
     val emailRegex = Regex("^([a-zA-Z0-9._%+-]+)?@+(?:gmail|hotmail|outlook)\\.com\$")
+    val passwordRegex = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#\$%^&*]).{8,}\$")
+
     val authViewModel: AuthViewModel = AuthViewModel()
     val firebaseUser by authViewModel.firebaseUser.observeAsState(null)
 
     val loading = remember { mutableStateOf(false) }
     var passwordVisibility by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
+    var PasswordError by remember { mutableStateOf(false) }
     var userNameError by remember { mutableStateOf("") }
     val context = LocalContext.current
     val permissionToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -249,7 +252,10 @@ fun Register(navHostController: NavHostController) {
         }
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                PasswordError = !it.text.matches(passwordRegex)
+            },
             label = { Text("Password") },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
@@ -266,8 +272,20 @@ fun Register(navHostController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
         )
+        if (PasswordError) {
+            Text(
+            text = "Password must contain at least 8 characters, " +
+                    "one uppercase letter, one lowercase letter, " +
+                    "one digit, and one special character.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 5.dp)
+            )
+        }
         val backgroundColor =
-            if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
+            if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.text.isEmpty() || imageUri == null) {
                 Color.LightGray
             } else {
                 Color.Black
@@ -280,13 +298,13 @@ fun Register(navHostController: NavHostController) {
         } else {
             ElevatedButton(
                 onClick = {
-                    if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.isEmpty() || imageUri == null) {
+                    if (name.isEmpty() || username.text.isEmpty() || email.text.isEmpty() || bio.isEmpty() || password.text.isEmpty() || imageUri == null) {
                         showDialog = true
                     } else {
                         loading.value = true
                         authViewModel.register(
                             email.text,
-                            password,
+                            password.text,
                             name,
                             bio,
                             username.text,

@@ -20,7 +20,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,8 +41,6 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.yasir.iustthread.model.ThreadModel
 import com.yasir.iustthread.model.UserModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun ThreadItem(
@@ -51,26 +48,6 @@ fun ThreadItem(
     users:UserModel,
     navHostController: NavHostController,
     userId:String
-) {
-    val shimmerVisibleState = remember {
-        mutableStateOf(true)
-    }
-    LaunchedEffect(shimmerVisibleState) {
-        launch {
-            delay(2000)
-            shimmerVisibleState.value = false
-        }
-    }
-    if (shimmerVisibleState.value) {
-        ShimmerItem()
-    } else {
-        ThreadContent(thread = thread, users = users)
-    }
-}
-@Composable
-fun ThreadContent(
-    thread: ThreadModel,
-    users: UserModel
 ) {
     Column {
         ConstraintLayout(
@@ -206,4 +183,5 @@ fun Modifier.shimmerEffect(): Modifier = composed {
         size =it.size
     }
 }
+
 
