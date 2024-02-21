@@ -23,7 +23,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -60,6 +63,7 @@ fun AddThreads(navHostController: NavHostController) {
     val threadViewModel: AddThreadViewModel = viewModel()
     val isPosted by threadViewModel.isPosted.observeAsState(false)
     val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
     var thread by remember {
         mutableStateOf("")
     }
@@ -88,11 +92,11 @@ fun AddThreads(navHostController: NavHostController) {
             thread = ""
             imageUri = null
             Toast.makeText(context, "thread Posted!", Toast.LENGTH_SHORT).show()
-            navHostController.navigate(Routes.Home.routes){
-                popUpTo(Routes.AddThread.routes){
-                    inclusive =true
+            navHostController.navigate(Routes.Home.routes) {
+                popUpTo(Routes.AddThread.routes) {
+                    inclusive = true
                 }
-                launchSingleTop=true
+                launchSingleTop = true
             }
         }
     }
@@ -240,7 +244,7 @@ fun AddThreads(navHostController: NavHostController) {
                     bottom.linkTo(parent.bottom, margin = 12.dp)
                 }
         )
-        var showDialog by remember { mutableStateOf(false) }
+
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
@@ -256,38 +260,51 @@ fun AddThreads(navHostController: NavHostController) {
                 modifier = Modifier.padding(16.dp)
             )
         }
-        TextButton(
-            onClick = {
+        val loading = remember { mutableStateOf(false) }
+        if (loading.value) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White),
+                color = Color.Green,
+            )
+        } else {
+            TextButton(
+                onClick = {
                     if (imageUri == null && thread.isNotEmpty()) {
+                        loading.value = true
                         threadViewModel.saveData(
                             thread,
                             FirebaseAuth.getInstance().currentUser!!.uid,
-                            ""
+                            "",
+                            loading
                         )
-                    }
-                    else if(imageUri!=null) {
+                    } else if (imageUri != null) {
+                        loading.value = true
                         threadViewModel.saveImage(
                             thread,
                             FirebaseAuth.getInstance().currentUser!!.uid,
-                            imageUri!!
+                            imageUri!!,
+                            loading
                         )
-                    }else{
+                    } else {
                         showDialog = true
                     }
 
-            },
-            modifier = Modifier.constrainAs(button) {
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-            }
-        ) {
-            Text(
-                text = "Post",
-                style = TextStyle(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp
+                },
+                modifier = Modifier.constrainAs(button) {
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }
+            ) {
+                Text(
+                    text = "Post",
+                    style = TextStyle(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp
+                    )
                 )
-            )
+            }
         }
 
 

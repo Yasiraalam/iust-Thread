@@ -162,8 +162,8 @@ fun Login(navController: NavHostController) {
                     if (email.text.isEmpty() || password.isEmpty()) {
                         showDialog = true
                     } else {
-                        loading.value = true // Start loading
-                        authViewModel.login(email.text, password, loading, context) // Pass loading state
+                        loading.value = true
+                        authViewModel.login(email.text, password, loading, context)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor),

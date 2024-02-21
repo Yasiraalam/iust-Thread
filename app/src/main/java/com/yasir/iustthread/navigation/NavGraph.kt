@@ -58,6 +58,7 @@ fun NavGraph(
             ){
                 composable(Routes.Splash.routes){
                     Splash(navController)
+
                 }
 
                 composable(Routes.Home.routes){

@@ -1,15 +1,13 @@
 package com.yasir.iustthread.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Text
@@ -34,10 +32,12 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.yasir.iustthread.item_view.ThreadItem
+import com.yasir.iustthread.model.ThreadModel
 import com.yasir.iustthread.model.UserModel
 import com.yasir.iustthread.navigation.Routes
 import com.yasir.iustthread.utils.SharedPref
 import com.yasir.iustthread.viewmodel.AuthViewModel
+import com.yasir.iustthread.viewmodel.HomeViewModel
 import com.yasir.iustthread.viewmodel.UserViewModel
 
 @Composable
@@ -55,6 +55,9 @@ fun OtherUsers(
     val followersList by userViewModel.followersList.observeAsState(null)
     val followingList by userViewModel.followingList.observeAsState(null)
 
+    val homeViewModel:HomeViewModel = viewModel()
+    val threadAndUsers by homeViewModel.threadsAndUsers.observeAsState(null)
+
 
     userViewModel.fetchThreads(uid)
     userViewModel.fetchUser(uid)
@@ -62,7 +65,7 @@ fun OtherUsers(
     userViewModel.getFollowing(uid)
 
     var currentUserId = ""
-    if (FirebaseAuth.getInstance().currentUser != null){
+    if (FirebaseAuth.getInstance().currentUser != null) {
         currentUserId = FirebaseAuth.getInstance().currentUser!!.uid
     }
 
@@ -73,10 +76,11 @@ fun OtherUsers(
                 launchSingleTop = true
             }
         }
-
     }
 
-    LazyColumn() {
+    LazyColumn (
+        modifier = Modifier.fillMaxSize()
+    ){
         item {
             ConstraintLayout(
                 modifier = Modifier
@@ -165,7 +169,7 @@ fun OtherUsers(
                 )
                 ElevatedButton(onClick = {
                     if (currentUserId != "") {
-                        userViewModel.followUsers(uid,currentUserId)
+                        userViewModel.followUsers(uid, currentUserId)
                     }
                 },
                     modifier = Modifier.constrainAs(button) {
@@ -173,25 +177,64 @@ fun OtherUsers(
                         start.linkTo(parent.start)
                     }
                 ) {
-                    Text(text =
-                    if(followersList!= null && followersList!!.isNotEmpty() && followersList!!.contains(currentUserId))
-                        "Following"
-                    else "Follow")
+                    Text(
+                        text =
+                        if (followersList != null && followersList!!.isNotEmpty() && followersList!!.contains(
+                                currentUserId
+                            )
+                        )
+                            "Following"
+                        else "Follow"
+                    )
                 }
             }
         }
         if (threads != null && users != null) {
-            items(threads ?: emptyList()) { pair ->
-                Divider(color = Color.Black, thickness = 1.dp)
-                ThreadItem(
-                    thread = pair,
-                    users = users!!,
-                    navHostController = navHostController,
-                    userId = SharedPref.getUserName(context)
-                )
+            if (threads!!.isEmpty()) {
+                item {
+                    Text(
+                        text = "User has not posted anything",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                    )
+                }
+            }else{
 
+                items(threads ?: emptyList()) { pair ->
+                    Divider(color = Color.Black, thickness = 1.dp)
+                    val threadId = pair.thread
+                    threadAndUsers?.let {
+                        ThreadItem(
+                            thread = pair,
+                            users = users!!,
+                            navHostController = navHostController,
+                            userId = SharedPref.getUserName(context),
+                            threadId = threadId,
+                            homeViewModel=homeViewModel,
+                            threadAndUsers= it
+                        )
+                    }
+                }
+            }
+        }else {
+            item {
+                Text(
+                    text = "Loading...",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                )
             }
         }
-    }
 
+    }
 }

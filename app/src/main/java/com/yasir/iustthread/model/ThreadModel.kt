@@ -1,10 +1,13 @@
 package com.yasir.iustthread.model
 
-import android.net.Uri
-
 data class ThreadModel(
     val thread:String="",
     val image: String="",
     val userId:String="",
-    val timeStamp:String=""
-)
+    val timeStamp:String="",
+    val likedBy: List<String> = emptyList(),
+    val likes:Int=0,
+    val comments:String=""
+){
+    constructor() : this("", "", "", "", emptyList(), 0, "")
+}

@@ -1,6 +1,7 @@
 package com.yasir.iustthread.viewmodel
 
 import android.net.Uri
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,11 +26,12 @@ class AddThreadViewModel : ViewModel() {
         thread: String,
         userId: String,
         imageUri: Uri,
+        loading: MutableState<Boolean>
     ) {
         val uploadTask = imageRef.putFile(imageUri)
         uploadTask.addOnSuccessListener {
             imageRef.downloadUrl.addOnSuccessListener {
-                saveData(thread, userId, it.toString())
+                saveData(thread, userId, it.toString(),loading)
             }
         }
 
@@ -39,12 +41,22 @@ class AddThreadViewModel : ViewModel() {
         thread: String,
         userId: String,
         image: String,
+        loading: MutableState<Boolean>
     ) {
-        val threadData = ThreadModel(thread , image, userId, System.currentTimeMillis().toString())
+        val threadData = ThreadModel(
+            thread ,
+            image,
+            userId,
+            System.currentTimeMillis().toString(),
+            likedBy= emptyList(),
+            likes=0,
+            comments=""
+        )
         userRef.child(userRef.push().key!!).setValue(threadData).addOnSuccessListener {
+            loading.value = false
             _isPosted.postValue(true)
         }.addOnFailureListener {
-
+             loading.value = false
         }
     }
 

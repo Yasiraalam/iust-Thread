@@ -21,7 +21,7 @@ fun Splash(navController: NavHostController) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (image) = createRefs()
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.threads_logo),
             contentDescription = "logo",
             modifier = Modifier
                 .constrainAs(image) {
