@@ -306,8 +306,6 @@ fun AddThreads(navHostController: NavHostController) {
                 )
             }
         }
-
-
     }
 
 }

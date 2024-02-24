@@ -6,8 +6,8 @@ data class ThreadModel(
     val userId:String="",
     val timeStamp:String="",
     val likedBy: List<String> = emptyList(),
-    val likes:Int=0,
+    val likes:Int,
     val comments:String=""
 ){
-    constructor() : this("", "", "", "", emptyList(), 0, "")
+    constructor() : this("","", "", "", emptyList(), 0, "")
 }

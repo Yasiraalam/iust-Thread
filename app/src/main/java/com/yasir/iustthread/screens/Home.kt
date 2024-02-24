@@ -1,11 +1,9 @@
 package com.yasir.iustthread.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,11 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,7 +27,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.yasir.iustthread.R
 import com.yasir.iustthread.item_view.ThreadItem
 import com.yasir.iustthread.viewmodel.HomeViewModel
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+
 
 @Composable
 fun Home(navHostController:NavHostController) {
@@ -45,14 +40,14 @@ fun Home(navHostController:NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ){
             Text(
-                text = "IUST-Thread",
+                text = "IUST-THREAD",
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 fontFamily = FontFamily.Cursive,
                 fontWeight = FontWeight(12),
                 modifier = Modifier.padding(start = 10.dp)
             )
-            Spacer(modifier = Modifier.padding(horizontal = 30.dp))
+            Spacer(modifier = Modifier.padding(horizontal = 27.dp))
             Image(
                 painter = painterResource(id = R.drawable.threads_logo),
                 contentDescription = null,
@@ -64,7 +59,7 @@ fun Home(navHostController:NavHostController) {
         Spacer(modifier = Modifier.padding(vertical = 10.dp))
         LazyColumn {
             items(threadAndUsers?: emptyList()){pairs->
-                val threadId = pairs.first.thread
+                val threadId= pairs.first.thread
                 threadAndUsers?.let {
                     ThreadItem(
                         threadId = threadId,

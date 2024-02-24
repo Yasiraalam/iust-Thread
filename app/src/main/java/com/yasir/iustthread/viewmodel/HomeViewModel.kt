@@ -1,22 +1,21 @@
 package com.yasir.iustthread.viewmodel
 
+
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.yasir.iustthread.model.ThreadModel
 import com.yasir.iustthread.model.UserModel
-import com.yasir.iustthread.utils.SharedPref
 
 class HomeViewModel : ViewModel() {
 
     private val database = FirebaseDatabase.getInstance()
-    val thread = database.getReference("threads")
+    private val allThreads = database.getReference("threads")
 
     private val _threadsAndUsers = MutableLiveData<List<Pair<ThreadModel, UserModel>>>()
     val threadsAndUsers: LiveData<List<Pair<ThreadModel, UserModel>>> = _threadsAndUsers
@@ -27,7 +26,7 @@ class HomeViewModel : ViewModel() {
         }
     }
     private fun fetchThreadAndUsers(onResult: (List<Pair<ThreadModel,UserModel>>) -> Unit) {
-        thread.addValueEventListener(object : ValueEventListener {
+        allThreads.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val result = mutableListOf<Pair<ThreadModel, UserModel>>()
                 for (threadSnapshot in snapshot.children) {
@@ -43,7 +42,7 @@ class HomeViewModel : ViewModel() {
                 }
             }
             override fun onCancelled(error: DatabaseError) {
-
+                Log.d("iust", "DatabaseError")
             }
         })
     }
@@ -62,16 +61,13 @@ class HomeViewModel : ViewModel() {
                 }
             })
     }
-    fun likeThread(threadId: String, userId: String, callback: (Int) -> Unit) {
-        val threadRef = thread.child(threadId)
+    fun toggleThreadLike(threadId: String, userId: String, isLiked: Boolean, callback: (Int) -> Unit) {
+        val threadRef = allThreads.child(threadId)
         threadRef.get().addOnSuccessListener { dataSnapshot ->
             val currentThread = dataSnapshot.getValue(ThreadModel::class.java)
 
             currentThread?.let {
-                val isLiked = it.likedBy.contains(userId)
-
                 val newLikesCount = if (isLiked) it.likes - 1 else it.likes + 1
-
                 val newLikedBy = if (isLiked) {
                     it.likedBy.toMutableList().apply { remove(userId) }
                 } else {
@@ -88,7 +84,8 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }.addOnFailureListener { exception ->
-            println("Like not count something is wrong")
+            println("Error toggling like status: $exception")
         }
     }
+
 }

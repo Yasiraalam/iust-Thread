@@ -1,6 +1,5 @@
 package com.yasir.iustthread.item_view
 
-import android.widget.Toast
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -28,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,15 +41,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.google.firebase.firestore.auth.User
+import com.google.firebase.auth.FirebaseAuth
 import com.yasir.iustthread.R
 import com.yasir.iustthread.model.ThreadModel
 import com.yasir.iustthread.model.UserModel
@@ -69,8 +65,7 @@ fun ThreadItem(
     homeViewModel: HomeViewModel,
     threadAndUsers: List<Pair<ThreadModel, UserModel>>
 ) {
-
-    var shimmerVisibleState = remember { mutableStateOf(true) }
+    val shimmerVisibleState = remember { mutableStateOf(true) }
     LaunchedEffect(shimmerVisibleState) {
         launch {
             delay(1500)
@@ -87,10 +82,8 @@ fun ThreadItem(
                 threadId = threadId,
                 homeViewModel =homeViewModel
             )
-
         }
     }
-
 }
 
 @Composable
@@ -158,12 +151,13 @@ fun ThreadContent(
             }
         }
         LaunchedEffect(threadId) {
-            homeViewModel.likeThread(threadId, thread.userId) { likesCount ->
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+            val isLiked = thread.likedBy.contains(userId)
+
+            homeViewModel.toggleThreadLike(threadId, userId, isLiked) { likesCount ->
                 likes = likesCount
             }
         }
-        // Like and Comment Section
-        val context = LocalContext.current
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -177,13 +171,30 @@ fun ThreadContent(
                 modifier = Modifier
                     .size(24.dp)
                     .clickable {
-                        isLiked = !isLiked
-                        Toast
-                            .makeText(context, "threadID:$threadId", Toast.LENGTH_SHORT)
-                            .show()
-                        homeViewModel.likeThread(threadId, thread.userId) { likesCount ->
-                            likes = likesCount
+                        val newLikeStatus = !isLiked
+                        homeViewModel.toggleThreadLike(
+                            threadId = threadId,
+                            userId = FirebaseAuth.getInstance().currentUser!!.uid,
+                            isLiked = newLikeStatus
+                        ) { newLikesCount ->
+                            likes = newLikesCount
                         }
+                        isLiked = newLikeStatus
+//                        if (isLiked) {
+//                            homeViewModel.toggleThreadLike(
+//                                threadId,
+//                                thread.userId
+//                            ) { newLikesCount ->
+//                                likes = newLikesCount
+//                            }
+//                        } else {
+//                            homeViewModel.toggleThreadLike(
+//                                threadId,
+//                                thread.userId
+//                            ) { newLikesCount ->
+//                                likes = newLikesCount
+//                            }
+//                        }
                     }
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -209,7 +220,6 @@ fun ThreadContent(
         }
     }
 }
-
 @Composable
 fun ShimmerItem() {
     Column(
